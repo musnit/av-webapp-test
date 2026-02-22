@@ -120,6 +120,7 @@ export default async function handler(req, res) {
       source: hashBase,
       translation
     }, null, 2), {
+      access: 'private',
       contentType: 'application/json',
       addRandomSuffix: false
     });
