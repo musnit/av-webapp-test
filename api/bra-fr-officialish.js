@@ -13,8 +13,11 @@ export default async function handler(req, res) {
   function escRe(s){return s.replace(/[.*+?^$()|[\]\\]/g,'\\$&')}
   function swap(txt,from,to){ if(!from||!to) return txt; return txt.replace(new RegExp(escRe(from),'g'),to); }
   try {
+    const xmlUrl = ('${lang}'==='en')
+      ? '/api/bra-xml-en?massif=${massif}&t='+Date.now()
+      : '/api/bra-xml?massif=${massif}&t='+Date.now();
     const [xmlTxt,xsltTxt]=await Promise.all([
-      fetch('/api/bra-xml?massif=${massif}&t='+Date.now()).then(r=>r.text()),
+      fetch(xmlUrl).then(r=>r.text()),
       fetch('/api/bra-xslt?t='+Date.now()).then(r=>r.text())
     ]);
     const parser=new DOMParser();
@@ -30,9 +33,7 @@ export default async function handler(req, res) {
     out.appendChild(frag);
 
     if('${lang}'==='en'){
-      const tr=await fetch('/api/bra-en-llm?massif=${massif}&t='+Date.now()).then(r=>r.json());
       let h=out.innerHTML;
-      // Static labels
       const staticMap = [
         ["Bulletin d'estimation du risque d'avalanche","Avalanche hazard bulletin"],
         ["(valable en dehors des pistes balisées et ouvertes)","(valid outside marked/open runs)"],
@@ -46,27 +47,19 @@ export default async function handler(req, res) {
         ["Enneigement","Snowpack depth"],
         ["Neige fraîche","Fresh snow"],
         ["Qualité de la neige","Snow quality"],
+        ["Aperçu météo pour le","Weather outlook for"],
         ["Météo","Weather"],
         ["Déclenchements provoqués","Human-triggered avalanches"],
         ["Départs spontanés","Natural avalanche activity"],
-        ["Indices de risque : 5 très fort - 4 fort - 3 marqué - 2 limité - 1 faible","Danger levels: 5 very high - 4 high - 3 considerable - 2 moderate - 1 low"]
+        ["Pour consulter la vigilance en cours, veuillez vous rendre sur le site","To view current weather warnings, please visit"],
+        ["Indices de risque : 5 très fort - 4 fort - 3 marqué - 2 limité - 1 faible","Danger levels: 5 very high - 4 high - 3 considerable - 2 moderate - 1 low"],
+        ["samedi","Saturday"],["dimanche","Sunday"],["lundi","Monday"],["mardi","Tuesday"],["mercredi","Wednesday"],["jeudi","Thursday"],["vendredi","Friday"],
+        ["janvier","January"],["février","February"],["mars","March"],["avril","April"],["mai","May"],["juin","June"],["juillet","July"],["août","August"],["septembre","September"],["octobre","October"],["novembre","November"],["décembre","December"],
+        ["Neige fraîche","Fresh snow"],["Neige ventée","Wind slab"],["Sous-couche fragile persistante","Persistent weak layer"],["Neige humide","Wet snow"],["Avalanches de fond","Gliding snow"],["Corniches","Cornices"]
       ];
       staticMap.forEach(([fr,en])=>{ h=swap(h,fr,en); });
-
-      // Dynamic text blocks (LLM)
-      h=swap(h,tr.riskComment||'',tr.riskCommentEn||'');
-      h=swap(h,tr.title||'',tr.titleEn||'');
-      h=swap(h,tr.stability||'',tr.stabilityEn||'');
-      h=swap(h,tr.quality||'',tr.qualityEn||'');
-      h=swap(h,tr.meteo||'',tr.meteoEn||'');
-
       out.innerHTML=h;
-
-      // Selector-level overrides (more robust than string swap)
-      const st = out.querySelector('#stabilite');
-      if (st && tr.stabilityEn) st.textContent = tr.stabilityEn;
-
-      document.getElementById('status').textContent='Official XSLT render attempt (EN)';
+      document.getElementById('status').textContent='Official XSLT render attempt (EN, full-XML translated)';
     } else {
       document.getElementById('status').textContent='Official XSLT render attempt (FR)';
     }
