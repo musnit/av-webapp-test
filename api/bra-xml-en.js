@@ -15,9 +15,15 @@ async function readBlobText(url) {
 async function translateXml(xml) {
   const prompt = `Translate the following French avalanche bulletin XML to English.
 Rules:
-- Keep XML structure, element names, attributes names, ordering, and numeric values unchanged.
-- Translate only human-readable French text content and French text attribute values.
+- Keep XML structure, element names, attribute names, ordering, and numeric values unchanged.
+- Translate ALL human-readable French text everywhere, including:
+  1) normal element text nodes,
+  2) attribute values that contain French text,
+  3) ALL CDATA blocks (mandatory),
+  4) mixed-content text around links/tags.
+- Do NOT leave any French sentence untranslated unless it is a proper noun, acronym, code, URL, or unit.
 - Keep URLs unchanged.
+- Preserve CDATA sections as CDATA (translate inside them, but keep CDATA wrappers).
 - Keep valid XML output only. No markdown, no explanations.
 
 XML:\n${xml}`;
@@ -61,7 +67,8 @@ export default async function handler(req, res) {
       return res.status(500).send('Missing BLOB_READ_WRITE_TOKEN');
     }
 
-    const h = hash(frXml);
+    const translationVersion = 'xml-en-v2-cdata';
+    const h = hash(translationVersion + '|' + frXml);
     const blobPath = `translations/bra-xml-en/${massif}/${h}.xml`;
 
     try {
