@@ -14,13 +14,25 @@ function tinyIcon(label = '?') {
   </svg>`;
 }
 
+function satIcon(level = '1') {
+  const colors = { '1': '#2563eb', '2': '#7c3aed', '3': '#0ea5e9', '4': '#f59e0b', '5': '#ef4444', '6': '#059669' };
+  const c = colors[level] || '#64748b';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="56" viewBox="0 0 120 56">
+    <rect x="2" y="2" width="116" height="52" rx="10" fill="${c}"/>
+    <text x="60" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="white">SAT ${level}</text>
+  </svg>`;
+}
+
 export default async function handler(req, res) {
   const name = String(req.query.name || '').toUpperCase();
 
   let svg = '';
   const riskMatch = name.match(/^R([1-5])\.PNG$/);
+  const satMatch = name.match(/^SAT([1-6])\.PNG$/);
   if (riskMatch) {
     svg = svgForRisk(riskMatch[1]);
+  } else if (satMatch) {
+    svg = satIcon(satMatch[1]);
   } else if (name === 'VENT.PNG') {
     svg = tinyIcon('Wind');
   } else if (name === 'WW.PNG') {
