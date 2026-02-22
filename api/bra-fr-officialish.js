@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 <div id="out"></div>
 <script>
 (async()=>{
-  function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+  function escRe(s){return s.replace(/[.*+?^$()|[\]\\]/g,'\\$&')}
   function swap(txt,from,to){ if(!from||!to) return txt; return txt.replace(new RegExp(escRe(from),'g'),to); }
   try {
     const [xmlTxt,xsltTxt]=await Promise.all([
