@@ -21,7 +21,7 @@
     .tab.active { background:#2dd4bf; color:#042f2e; border-color:#2dd4bf; font-weight:700; }
     .panel { display:none; }
     .panel.active { display:block; }
-    .renderBox { width:100%; min-height:78vh; border:0; border-radius:12px; background:#fff; overflow-x:hidden; }
+    .renderBox { width:100%; min-height:78vh; border:0; border-radius:12px; background:transparent; overflow-x:hidden; }
     #pdfEmbed { width:100%; height:78vh; border:0; border-radius:12px; background:#fff; }
     .card { margin-top:10px; background:#111827; border:1px solid #334155; border-radius:12px; padding:10px; }
     .legendTable { width:100%; border-collapse:collapse; margin-top:8px; }
@@ -46,9 +46,9 @@
       <button class="tab" data-tab="legend">Icon mapping legend</button>
     </div>
 
-    <section id="panel-en" class="panel active"><div id="frameEn" class="renderBox"></div></section>
-    <section id="panel-improved" class="panel"><div id="frameImproved" class="renderBox"></div></section>
-    <section id="panel-fr" class="panel"><div id="frameFr" class="renderBox"></div></section>
+    <section id="panel-en" class="panel active" style="background:transparent"><div id="frameEn" class="renderBox"></div></section>
+    <section id="panel-improved" class="panel" style="background:transparent"><div id="frameImproved" class="renderBox"></div></section>
+    <section id="panel-fr" class="panel" style="background:transparent"><div id="frameFr" class="renderBox"></div></section>
     <section id="panel-pdf" class="panel"><embed id="pdfEmbed" type="application/pdf" /></section>
 
     <section id="panel-legend" class="panel">
@@ -126,7 +126,18 @@
       const txt = await r.text();
       const doc = new DOMParser().parseFromString(txt, 'text/html');
       const bodyHtml = doc.body ? doc.body.innerHTML : txt;
-      el.innerHTML = `<div style="overflow-x:hidden">${bodyHtml}</div>`;
+      const headStyles = (doc.head ? Array.from(doc.head.querySelectorAll('style,link[rel="stylesheet"]')).map(n=>n.outerHTML).join('') : '');
+
+      el.innerHTML = `
+        <div style="overflow-x:hidden;background:transparent;color:inherit">
+          ${headStyles}
+          <style>
+            .renderInner img{max-width:100%;height:auto}
+            .renderInner .pictoSAT{width:28px !important;height:28px !important}
+            .renderInner .iconMap img,.renderInner .risqueMaxi img{max-height:76px !important;width:auto !important}
+          </style>
+          <div class="renderInner">${bodyHtml}</div>
+        </div>`;
 
       // Re-run inline scripts from fetched HTML so dynamic render pages populate.
       const scripts = el.querySelectorAll('script');
