@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     const p=new XSLTProcessor();
     p.importStylesheet(xsl);
     p.setParameter(null,'urlBlob',window.location.origin + '/api/bra-blob?blob_filename=');
+    p.setParameter(null,'CheminPicto',window.location.origin + '/api/bra-picto?name=');
     p.setParameter(null,'dateExp',new Date().toString());
     const frag=p.transformToFragment(xml,document);
     document.getElementById('out').appendChild(frag);
