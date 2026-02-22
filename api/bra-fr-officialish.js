@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       : '/api/bra-xml?massif=${massif}&t='+Date.now();
     const [xmlTxt,xsltTxt]=await Promise.all([
       fetch(xmlUrl).then(r=>r.text()),
-      fetch('/api/bra-xslt?t='+Date.now()).then(r=>r.text())
+      fetch('/api/bra-xslt?lang=${lang}&t='+Date.now()).then(r=>r.text())
     ]);
     const parser=new DOMParser();
     const xml=parser.parseFromString(xmlTxt,'text/xml');
