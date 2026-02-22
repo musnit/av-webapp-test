@@ -102,9 +102,9 @@ export default async function handler(req, res) {
 
     const frHtml = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
-body{font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#f4f7fb;color:#0f172a;margin:0;padding:12px}
-.wrap{max-width:960px;margin:0 auto}.card{background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:12px;margin-bottom:10px}
-h1{margin:0 0 6px;font-size:24px}.muted{color:#475569;font-size:13px}.risk{font-size:30px;font-weight:800}.grid{display:grid;grid-template-columns:1fr;gap:10px}
+body{font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#0b1324;color:#e2e8f0;margin:0;padding:12px}
+.wrap{max-width:960px;margin:0 auto}.card{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:10px}
+h1{margin:0 0 6px;font-size:24px;color:#f8fafc}.muted{color:#94a3b8;font-size:13px}.risk{font-size:30px;font-weight:800;color:#f8fafc}.grid{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:860px){.grid{grid-template-columns:1fr 1fr}} h3{margin:0 0 6px} p{margin:0;white-space:pre-wrap;line-height:1.42}
 </style></head><body><div class="wrap">
 <div class="card"><h1>Bulletin d'estimation du risque d'avalanche</h1><div class="muted">Massif: <b>${data.massif}</b> • Rédigé: ${data.issued} • Valide jusqu'à: ${data.valid}</div><div class="risk">${data.risk}/5</div><div>${data.riskComment}</div></div>
