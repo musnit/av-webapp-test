@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       if (fs.existsSync(abs)) {
         const svg = fs.readFileSync(abs, 'utf8');
         res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.setHeader('Cache-Control', 'no-store');
         return res.status(200).send(svg);
       }
     }
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     // keep tiny placeholders for misc icons in XSLT
     const short = name.replace('.PNG', '') || '?';
     res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).send(fallbackSvg(short));
   } catch (err) {
     return res.status(500).send(`Error: ${err.message}`);
