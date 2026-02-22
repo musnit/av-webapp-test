@@ -13,28 +13,61 @@
     .row { display:flex; gap:8px; flex-wrap:wrap; }
     button,a.btn { background:#2dd4bf; color:#042f2e; border:0; padding:10px 12px; border-radius:10px; font-weight:700; text-decoration:none; }
     .muted { color:#cbd5e1; font-size:13px; margin-top:8px; }
-    iframe { width:100%; height:82vh; border:0; border-radius:12px; background:#fff; margin-top:12px; }
+    iframe { width:100%; height:68vh; border:0; border-radius:12px; background:#fff; margin-top:12px; }
     .pill { background:#1e293b; color:#93c5fd; border-radius:999px; padding:4px 8px; font-size:12px; }
+    .card { margin-top:12px; background:#111827; border:1px solid #334155; border-radius:12px; padding:12px; line-height:1.4; }
+    .card h3 { margin:10px 0 6px; font-size:16px; color:#bfdbfe; }
+    .small { font-size:13px; color:#cbd5e1; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="pill">One tap • Official bulletin PDF</div>
+    <div class="pill">One tap • Official bulletin PDF + English summary</div>
     <h1>Mont-Blanc Avalanche Bulletin</h1>
     <div class="row">
-      <button id="open">Open latest bulletin</button>
-      <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Open official page (EN)</a>
+      <button id="open">Reload official PDF</button>
+      <button id="openEn">Refresh English</button>
+      <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Official page (EN)</a>
     </div>
-    <div class="muted">The PDF below is the official Météo-France BRA for Mont-Blanc. Tap once and it loads inline.</div>
+    <div class="muted">Official Météo-France BRA PDF (French) + in-app English translation summary below.</div>
     <iframe id="pdf" title="BRA PDF"></iframe>
+    <div id="en" class="card small">Loading English summary…</div>
   </div>
   <script>
     const pdf = document.getElementById('pdf');
+    const en = document.getElementById('en');
+
     function openPdf() {
       pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
     }
+
+    async function loadEnglish() {
+      en.textContent = 'Loading English summary…';
+      try {
+        const r = await fetch('/api/bra-en?massif=3&t=' + Date.now());
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'Failed');
+        en.innerHTML = `
+          <h3>Danger level</h3>
+          <div><b>${j.risk || '?'}/5</b> — ${j.riskCommentEn || ''}</div>
+          <h3>Main message</h3>
+          <div>${j.titleEn || ''}</div>
+          <h3>Stability / avalanche problems</h3>
+          <div>${(j.stabilityEn || '').replace(/\n/g,'<br>')}</div>
+          <h3>Snow quality</h3>
+          <div>${(j.qualityEn || '').replace(/\n/g,'<br>')}</div>
+          <h3>Weather driver</h3>
+          <div>${j.meteoEn || ''}</div>
+        `;
+      } catch (e) {
+        en.textContent = 'English summary failed to load: ' + e.message;
+      }
+    }
+
     document.getElementById('open').addEventListener('click', openPdf);
+    document.getElementById('openEn').addEventListener('click', loadEnglish);
     openPdf();
+    loadEnglish();
   </script>
 </body>
 </html>
