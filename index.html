@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mont-Blanc Avalanche Bulletin</title>
+  <meta name="theme-color" content="#0b1324" />
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    body { margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif; background:#0b1324; color:#fff; }
+    .wrap { max-width:900px; margin:0 auto; padding:14px; }
+    h1 { font-size:20px; margin:8px 0 12px; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    button,a.btn { background:#2dd4bf; color:#042f2e; border:0; padding:10px 12px; border-radius:10px; font-weight:700; text-decoration:none; }
+    .muted { color:#cbd5e1; font-size:13px; margin-top:8px; }
+    iframe { width:100%; height:82vh; border:0; border-radius:12px; background:#fff; margin-top:12px; }
+    .pill { background:#1e293b; color:#93c5fd; border-radius:999px; padding:4px 8px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="pill">One tap • Official bulletin PDF</div>
+    <h1>Mont-Blanc Avalanche Bulletin</h1>
+    <div class="row">
+      <button id="open">Open latest bulletin</button>
+      <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Open official page (EN)</a>
+    </div>
+    <div class="muted">The PDF below is the official Météo-France BRA for Mont-Blanc. Tap once and it loads inline.</div>
+    <iframe id="pdf" title="BRA PDF"></iframe>
+  </div>
+  <script>
+    const pdf = document.getElementById('pdf');
+    function openPdf() {
+      pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
+    }
+    document.getElementById('open').addEventListener('click', openPdf);
+    openPdf();
+  </script>
+</body>
+</html>
