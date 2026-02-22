@@ -23,13 +23,20 @@ export default async function handler(req, res) {
     const parser=new DOMParser();
     const xml=parser.parseFromString(xmlTxt,'text/xml');
     const xsl=parser.parseFromString(xsltTxt,'text/xml');
+    const out=document.getElementById('out');
+
+    const xmlErr = xml.querySelector('parsererror');
+    if (xmlErr) throw new Error('XML parse error: '+xmlErr.textContent.slice(0,180));
+    const xslErr = xsl.querySelector('parsererror');
+    if (xslErr) throw new Error('XSLT parse error: '+xslErr.textContent.slice(0,180));
+
     const p=new XSLTProcessor();
     p.importStylesheet(xsl);
     p.setParameter(null,'urlBlob',window.location.origin + '/api/bra-blob?blob_filename=');
     p.setParameter(null,'CheminPicto',window.location.origin + '/api/bra-picto?name=');
     p.setParameter(null,'dateExp',new Date().toString());
     const frag=p.transformToFragment(xml,document);
-    const out=document.getElementById('out');
+    if (!frag || !(frag instanceof Node)) throw new Error('XSLT transform returned empty/non-node fragment');
     out.appendChild(frag);
 
     if('${lang}'==='en'){

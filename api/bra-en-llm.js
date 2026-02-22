@@ -62,7 +62,7 @@ async function translateWithLlm(frObj) {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-5-nano-2025-08-07',
       temperature: 0.1,
       response_format: { type: 'json_object' },
       messages: [
