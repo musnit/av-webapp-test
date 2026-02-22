@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     const html = String(body.html || '');
     if (!html) return res.status(400).json({ error: 'Missing html' });
 
-    const version = 'html-en-v1';
+    const version = 'html-en-v2-reset';
     const h = sha(version + '|' + html);
     const blobPath = `translations/html-en/${h}.json`;
 
