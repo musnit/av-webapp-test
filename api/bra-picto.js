@@ -16,10 +16,19 @@ function tinyIcon(label = '?') {
 
 function satIcon(level = '1') {
   const colors = { '1': '#2563eb', '2': '#7c3aed', '3': '#0ea5e9', '4': '#f59e0b', '5': '#ef4444', '6': '#059669' };
+  const labels = {
+    '1': 'Neige fraîche',
+    '2': 'Neige ventée',
+    '3': 'Sous-couche fragile',
+    '4': 'Neige humide',
+    '5': 'Avalanches de fond',
+    '6': 'Glissement'
+  };
   const c = colors[level] || '#64748b';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="56" viewBox="0 0 120 56">
-    <rect x="2" y="2" width="116" height="52" rx="10" fill="${c}"/>
-    <text x="60" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="white">SAT ${level}</text>
+  const l = labels[level] || `SAT ${level}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="56" viewBox="0 0 220 56">
+    <rect x="2" y="2" width="216" height="52" rx="10" fill="${c}"/>
+    <text x="110" y="33" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="white">${l}</text>
   </svg>`;
 }
 
