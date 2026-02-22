@@ -63,7 +63,6 @@ async function translateWithLlm(frObj) {
     },
     body: JSON.stringify({
       model: 'gpt-5-nano',
-      temperature: 0.1,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: 'You are a professional avalanche bulletin translator. Output valid JSON only.' },

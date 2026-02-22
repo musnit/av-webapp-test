@@ -29,7 +29,6 @@ XML:\n${xml}`;
     },
     body: JSON.stringify({
       model: 'gpt-5-nano',
-      temperature: 0,
       messages: [
         { role: 'system', content: 'You are an XML translator. Return XML only.' },
         { role: 'user', content: prompt }
