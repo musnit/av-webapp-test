@@ -21,7 +21,12 @@
     .xmlFrame { width:100%; height:42vh; border:0; border-radius:12px; background:#0b1324; margin-top:10px; }
     .officialFrame { width:100%; height:55vh; border:0; border-radius:12px; background:#fff; margin-top:10px; }
     .legendTable { width:100%; border-collapse:collapse; margin-top:8px; }
-    .legendTable th,.legendTable td { border-bottom:1px solid #334155; padding:6px; text-align:left; font-size:12px; }
+    .legendTable th,.legendTable td { border-bottom:1px solid #334155; padding:6px; text-align:left; font-size:12px; vertical-align:middle; }
+    .iconCell { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .iconCell img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:6px; padding:2px; }
+    .iconRowTop { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:8px; }
+    .iconChip { display:flex; align-items:center; gap:6px; background:#0f172a; border:1px solid #334155; border-radius:999px; padding:4px 10px; font-size:12px; }
+    .iconChip img { width:28px; height:28px; object-fit:contain; background:#fff; border-radius:6px; padding:2px; }
   </style>
 </head>
 <body>
@@ -52,34 +57,47 @@
 
     <div class="card small">
       <h3>Icon mapping legend (XML → icon)</h3>
+      <div class="iconRowTop">
+        <div class="iconChip"><img src="/api/bra-picto?name=R1.png" alt="R1"><span>R1</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=R2.png" alt="R2"><span>R2</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=R3.png" alt="R3"><span>R3</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=R4.png" alt="R4"><span>R4</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=R5.png" alt="R5"><span>R5</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT1.png" alt="SAT1"><span>SAT1</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT2.png" alt="SAT2"><span>SAT2</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT3.png" alt="SAT3"><span>SAT3</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT4.png" alt="SAT4"><span>SAT4</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT5.png" alt="SAT5"><span>SAT5</span></div>
+        <div class="iconChip"><img src="/api/bra-picto?name=SAT6.png" alt="SAT6"><span>SAT6</span></div>
+      </div>
       <table class="legendTable">
         <thead><tr><th>XML code</th><th>Mapped icon</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td>R1</td><td><img src="/api/bra-picto?name=R1.png" alt="R1" style="height:28px;vertical-align:middle"> EAWS Dry Snow Danger 1</td><td>Official EAWS SVG</td></tr>
-          <tr><td>R2</td><td><img src="/api/bra-picto?name=R2.png" alt="R2" style="height:28px;vertical-align:middle"> EAWS Dry Snow Danger 2</td><td>Official EAWS SVG</td></tr>
-          <tr><td>R3</td><td><img src="/api/bra-picto?name=R3.png" alt="R3" style="height:28px;vertical-align:middle"> EAWS Dry Snow Danger 3</td><td>Official EAWS SVG</td></tr>
-          <tr><td>R4</td><td><img src="/api/bra-picto?name=R4.png" alt="R4" style="height:28px;vertical-align:middle"> EAWS Dry Snow Danger 4-5</td><td>Closest available official asset</td></tr>
-          <tr><td>R5</td><td><img src="/api/bra-picto?name=R5.png" alt="R5" style="height:28px;vertical-align:middle"> EAWS Dry Snow Danger 4-5</td><td>Closest available official asset</td></tr>
-          <tr><td>SAT1</td><td><img src="/api/bra-picto?name=SAT1.png" alt="SAT1" style="height:28px;vertical-align:middle"> EAWS Avalanche Problem: New Snow</td><td>Direct mapping</td></tr>
-          <tr><td>SAT2</td><td><img src="/api/bra-picto?name=SAT2.png" alt="SAT2" style="height:28px;vertical-align:middle"> EAWS Avalanche Problem: Wind Slab</td><td>Direct mapping</td></tr>
-          <tr><td>SAT3</td><td><img src="/api/bra-picto?name=SAT3.png" alt="SAT3" style="height:28px;vertical-align:middle"> EAWS Avalanche Problem: Persistent Weak Layer</td><td>Direct mapping</td></tr>
-          <tr><td>SAT4</td><td><img src="/api/bra-picto?name=SAT4.png" alt="SAT4" style="height:28px;vertical-align:middle"> EAWS Avalanche Problem: Wet Snow</td><td>Direct mapping</td></tr>
-          <tr><td>SAT5</td><td><img src="/api/bra-picto?name=SAT5.png" alt="SAT5" style="height:28px;vertical-align:middle"> EAWS Avalanche Problem: Gliding Snow</td><td>Closest to French “avalanches de fond”</td></tr>
-          <tr><td>SAT6</td><td><img src="/api/bra-picto?name=SAT6.png" alt="SAT6" style="height:28px;vertical-align:middle"> EAWS Optional Problem: Cornices</td><td>Best-fit optional mapping</td></tr>
+          <tr><td>R1</td><td><div class="iconCell"><img src="/api/bra-picto?name=R1.png" alt="R1"><span>EAWS Dry Snow Danger 1</span></div></td><td>Official EAWS SVG</td></tr>
+          <tr><td>R2</td><td><div class="iconCell"><img src="/api/bra-picto?name=R2.png" alt="R2"><span>EAWS Dry Snow Danger 2</span></div></td><td>Official EAWS SVG</td></tr>
+          <tr><td>R3</td><td><div class="iconCell"><img src="/api/bra-picto?name=R3.png" alt="R3"><span>EAWS Dry Snow Danger 3</span></div></td><td>Official EAWS SVG</td></tr>
+          <tr><td>R4</td><td><div class="iconCell"><img src="/api/bra-picto?name=R4.png" alt="R4"><span>EAWS Dry Snow Danger 4-5</span></div></td><td>Closest available official asset</td></tr>
+          <tr><td>R5</td><td><div class="iconCell"><img src="/api/bra-picto?name=R5.png" alt="R5"><span>EAWS Dry Snow Danger 4-5</span></div></td><td>Closest available official asset</td></tr>
+          <tr><td>SAT1</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT1.png" alt="SAT1"><span>EAWS Avalanche Problem: New Snow</span></div></td><td>Direct mapping</td></tr>
+          <tr><td>SAT2</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT2.png" alt="SAT2"><span>EAWS Avalanche Problem: Wind Slab</span></div></td><td>Direct mapping</td></tr>
+          <tr><td>SAT3</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT3.png" alt="SAT3"><span>EAWS Avalanche Problem: Persistent Weak Layer</span></div></td><td>Direct mapping</td></tr>
+          <tr><td>SAT4</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT4.png" alt="SAT4"><span>EAWS Avalanche Problem: Wet Snow</span></div></td><td>Direct mapping</td></tr>
+          <tr><td>SAT5</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT5.png" alt="SAT5"><span>EAWS Avalanche Problem: Gliding Snow</span></div></td><td>Closest to French “avalanches de fond”</td></tr>
+          <tr><td>SAT6</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT6.png" alt="SAT6"><span>EAWS Optional Problem: Cornices</span></div></td><td>Best-fit optional mapping</td></tr>
         </tbody>
       </table>
       <div style="margin-top:8px"><b>Additional downloaded EAWS icons (for coverage):</b></div>
       <table class="legendTable">
         <thead><tr><th>Icon family</th><th>Preview</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>Wet danger 1..5</td><td>
-            <img src="/api/bra-picto?name=WET1.png" style="height:24px"> 
-            <img src="/api/bra-picto?name=WET2.png" style="height:24px"> 
-            <img src="/api/bra-picto?name=WET3.png" style="height:24px"> 
-            <img src="/api/bra-picto?name=WET4.png" style="height:24px"> 
-            <img src="/api/bra-picto?name=WET5.png" style="height:24px"></td><td>Downloaded + wired</td></tr>
-          <tr><td>No-rating danger</td><td><img src="/api/bra-picto?name=R0.png" style="height:24px"></td><td>Downloaded + wired</td></tr>
-          <tr><td>Optional no-distinct problem</td><td><img src="/api/bra-picto?name=SAT0.png" style="height:24px"></td><td>Downloaded + wired</td></tr>
+          <tr><td>Wet danger 1..5</td><td><div class="iconCell">
+            <img src="/api/bra-picto?name=WET1.png" alt="WET1"> 
+            <img src="/api/bra-picto?name=WET2.png" alt="WET2"> 
+            <img src="/api/bra-picto?name=WET3.png" alt="WET3"> 
+            <img src="/api/bra-picto?name=WET4.png" alt="WET4"> 
+            <img src="/api/bra-picto?name=WET5.png" alt="WET5"></div></td><td>Downloaded + wired</td></tr>
+          <tr><td>No-rating danger</td><td><div class="iconCell"><img src="/api/bra-picto?name=R0.png" alt="R0"></div></td><td>Downloaded + wired</td></tr>
+          <tr><td>Optional no-distinct problem</td><td><div class="iconCell"><img src="/api/bra-picto?name=SAT0.png" alt="SAT0"></div></td><td>Downloaded + wired</td></tr>
         </tbody>
       </table>
       <div style="margin-top:8px">If you want different SAT mappings, tell me and I’ll adjust globally.</div>
