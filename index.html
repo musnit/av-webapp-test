@@ -21,8 +21,8 @@
     .tab.active { background:#2dd4bf; color:#042f2e; border-color:#2dd4bf; font-weight:700; }
     .panel { display:none; }
     .panel.active { display:block; }
-    iframe.renderFrame { width:100%; height:78vh; border:0; border-radius:12px; background:#0b1324; overflow:hidden; }
-    #pdfEmbed { width:100%; height:78vh; border:0; border-radius:12px; background:#0b1324; }
+    .renderBox { width:100%; min-height:78vh; border-radius:12px; background:transparent; overflow-x:hidden; }
+    .pdfLink { display:inline-block; margin-top:8px; padding:10px 14px; border-radius:10px; background:#2dd4bf; color:#042f2e; text-decoration:none; font-weight:700; }
     .card { margin-top:10px; background:#111827; border:1px solid #334155; border-radius:12px; padding:10px; }
     .legendTable { width:100%; border-collapse:collapse; margin-top:8px; }
     .legendTable th,.legendTable td { border-bottom:1px solid #334155; padding:6px; text-align:left; font-size:12px; vertical-align:middle; }
@@ -46,10 +46,10 @@
       <button class="tab" data-tab="legend">Legend</button>
     </div>
 
-    <section id="panel-en" class="panel active" style="background:transparent"><iframe id="frameEn" class="renderFrame" title="EN render"></iframe></section>
-    <section id="panel-improved" class="panel" style="background:transparent"><iframe id="frameImproved" class="renderFrame" title="Improved EN"></iframe></section>
-    <section id="panel-fr" class="panel" style="background:transparent"><iframe id="frameFr" class="renderFrame" title="FR render"></iframe></section>
-    <section id="panel-pdf" class="panel"><embed id="pdfEmbed" type="application/pdf" /></section>
+    <section id="panel-en" class="panel active"><div id="frameEn" class="renderBox"></div></section>
+    <section id="panel-improved" class="panel"><div id="frameImproved" class="renderBox"></div></section>
+    <section id="panel-fr" class="panel"><div id="frameFr" class="renderBox"></div></section>
+    <section id="panel-pdf" class="panel"><a class="pdfLink" id="pdfLink" target="_blank" rel="noopener">Open French PDF</a></section>
 
     <section id="panel-legend" class="panel">
       <div class="card">
@@ -87,7 +87,7 @@
     const frameEn = document.getElementById('frameEn');
     const frameImproved = document.getElementById('frameImproved');
     const frameFr = document.getElementById('frameFr');
-    const pdfEmbed = document.getElementById('pdfEmbed');
+    const pdfLink = document.getElementById('pdfLink');
 
     function showWarning(msg){ validation.style.display='block'; validation.textContent='⚠️ '+msg; }
     function clearWarning(){ validation.style.display='none'; validation.textContent=''; }
@@ -100,11 +100,28 @@
       } catch(e){ showWarning('Mapping validation failed: '+e.message); }
     }
 
-    function loadFrames(){
-      frameEn.src = '/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now();
-      frameImproved.src = '/api/bra-en-improved?massif=3&t=' + Date.now();
-      frameFr.src = '/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now();
-      pdfEmbed.src = '/api/bra-pdf?massif=3&t=' + Date.now();
+    async function loadHtmlInto(url, el){
+      const r = await fetch(url);
+      const txt = await r.text();
+      const doc = new DOMParser().parseFromString(txt, 'text/html');
+      const headStyles = doc.head ? Array.from(doc.head.querySelectorAll('style,link[rel="stylesheet"]')).map(n=>n.outerHTML).join('') : '';
+      const bodyHtml = doc.body ? doc.body.innerHTML : txt;
+      el.innerHTML = `<div style="overflow-x:hidden">${headStyles}${bodyHtml}</div>`;
+      const scripts = el.querySelectorAll('script');
+      scripts.forEach((oldScript) => {
+        const s = document.createElement('script');
+        if (oldScript.src) s.src = oldScript.src;
+        s.textContent = oldScript.textContent;
+        oldScript.replaceWith(s);
+      });
+      el.querySelectorAll('*').forEach(n=>{ n.style.maxWidth = n.style.maxWidth || '100%'; });
+    }
+
+    async function loadFrames(){
+      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now(), frameEn); } catch(e){ frameEn.textContent='Load failed'; }
+      try { await loadHtmlInto('/api/bra-en-improved?massif=3&t=' + Date.now(), frameImproved); } catch(e){ frameImproved.textContent='Load failed'; }
+      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now(), frameFr); } catch(e){ frameFr.textContent='Load failed'; }
+      pdfLink.href = '/api/bra-pdf?massif=3&t=' + Date.now();
     }
 
     document.querySelectorAll('.tab').forEach(btn=>{
