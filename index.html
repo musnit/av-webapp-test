@@ -157,10 +157,11 @@
     async function loadEnglish() {
       en.textContent = 'Loading English summary…';
       try {
-        const r = await fetch('/api/bra-en?massif=3&t=' + Date.now());
+        const r = await fetch('/api/bra-en-llm?massif=3&t=' + Date.now());
         const j = await r.json();
         if (!r.ok) throw new Error(j.error || 'Failed');
         en.innerHTML = `
+          <div style="margin-bottom:8px;color:#93c5fd">Translation: ${j.cached ? 'cache hit' : 'fresh LLM'} · hash: ${j.contentHash?.slice(0,10) || '-'}</div>
           <h3>Danger level</h3>
           <div><b>${j.risk || '?'}/5</b> — ${j.riskCommentEn || ''}</div>
           <h3>Main message</h3>
