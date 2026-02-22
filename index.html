@@ -51,6 +51,10 @@
 
     <section id="panel-legend" class="panel">
       <div class="card">
+        <h3 style="margin:0 0 8px">Translation debug</h3>
+        <div id="debugPanel" style="font-size:12px;line-height:1.4;color:#cbd5e1">Loading…</div>
+      </div>
+      <div class="card">
         <div class="iconRowTop">
           <div class="iconChip"><img src="/api/bra-picto?name=R1.png"><span>R1</span></div>
           <div class="iconChip"><img src="/api/bra-picto?name=R2.png"><span>R2</span></div>
@@ -85,6 +89,7 @@
     const frameEn = document.getElementById('frameEn');
     const frameFr = document.getElementById('frameFr');
     const framePdf = document.getElementById('framePdf');
+    const debugPanel = document.getElementById('debugPanel');
 
     function showWarning(msg){ validation.style.display='block'; validation.textContent='⚠️ '+msg; }
     function clearWarning(){ validation.style.display='none'; validation.textContent=''; }
@@ -95,6 +100,22 @@
         const j=await r.json();
         if(!j.ok) showWarning((j.warnings||[]).join(' · ')); else clearWarning();
       } catch(e){ showWarning('Mapping validation failed: '+e.message); }
+    }
+
+    async function loadDebug(){
+      try {
+        const r = await fetch('/api/bra-xml-en-debug?massif=3&t=' + Date.now());
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'debug failed');
+        debugPanel.innerHTML = `
+          <div><b>sections extracted:</b> ${j.sectionCount}</div>
+          <div><b>cache:</b> ${j.cacheHit ? 'hit' : 'miss'}</div>
+          <div><b>hash:</b> ${j.contentHash?.slice(0,12)}</div>
+          <div><b>refs:</b> ${j.refs.join(', ')}</div>
+        `;
+      } catch (e) {
+        debugPanel.textContent = 'Debug load failed: ' + e.message;
+      }
     }
 
     function loadFrames(){
@@ -114,6 +135,7 @@
 
     validateMapping();
     loadFrames();
+    loadDebug();
   </script>
 </body>
 </html>
