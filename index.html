@@ -127,6 +127,15 @@
       const doc = new DOMParser().parseFromString(txt, 'text/html');
       const bodyHtml = doc.body ? doc.body.innerHTML : txt;
       el.innerHTML = `<div style="overflow-x:hidden">${bodyHtml}</div>`;
+
+      // Re-run inline scripts from fetched HTML so dynamic render pages populate.
+      const scripts = el.querySelectorAll('script');
+      scripts.forEach((oldScript) => {
+        const s = document.createElement('script');
+        if (oldScript.src) s.src = oldScript.src;
+        s.textContent = oldScript.textContent;
+        oldScript.replaceWith(s);
+      });
     }
 
     async function loadFrames(){
