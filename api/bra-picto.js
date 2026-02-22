@@ -18,6 +18,15 @@ const MAP = {
   'SAT4.PNG': 'Icon-Avalanche-Problem-Wet-Snow-EAWS.svg',
   'SAT5.PNG': 'Icon-Avalanche-Problem-Gliding-Snow-EAWS.svg',
   'SAT6.PNG': 'Icon-Avalanche-Problem-Cornices.svg',
+
+  // Extra aliases / future-proof mappings
+  'R0.PNG': 'Icon-Avalanche-Danger-Level-No-Rating-EAWS.svg',
+  'WET1.PNG': 'Icon-Avalanche-Danger-Level-Wet-Snow-1-EAWS.svg',
+  'WET2.PNG': 'Icon-Avalanche-Danger-Level-Wet-Snow-2-EAWS.svg',
+  'WET3.PNG': 'Icon-Avalanche-Danger-Level-Wet-Snow-3-EAWS.svg',
+  'WET4.PNG': 'Icon-Avalanche-Danger-Level-Wet-Snow-4-5-EAWS.svg',
+  'WET5.PNG': 'Icon-Avalanche-Danger-Level-Wet-Snow-4-5-EAWS.svg',
+  'SAT0.PNG': 'Icon-Avalanche-Problem-No-Distinct-Avalanche-Problem-EAWS.svg'
 };
 
 function fallbackSvg(label = '•') {
