@@ -40,14 +40,12 @@
 
     <div class="tabs">
       <button class="tab active" data-tab="en">English</button>
-      <button class="tab" data-tab="improved">Improved English</button>
       <button class="tab" data-tab="fr">Français</button>
       <button class="tab" data-tab="pdf">PDF (FR)</button>
       <button class="tab" data-tab="legend">Legend</button>
     </div>
 
     <section id="panel-en" class="panel active"><div id="frameEn" class="renderBox"></div></section>
-    <section id="panel-improved" class="panel"><div id="frameImproved" class="renderBox"></div></section>
     <section id="panel-fr" class="panel"><div id="frameFr" class="renderBox"></div></section>
     <section id="panel-pdf" class="panel"><a class="pdfLink" id="pdfLink" target="_blank" rel="noopener">Open French PDF</a></section>
 
@@ -76,7 +74,6 @@
   <script>
     const validation = document.getElementById('validation');
     const frameEn = document.getElementById('frameEn');
-    const frameImproved = document.getElementById('frameImproved');
     const frameFr = document.getElementById('frameFr');
     const pdfLink = document.getElementById('pdfLink');
 
@@ -110,13 +107,10 @@
     async function loadTabContent(tab){
       // avoid duplicate IDs/scripts from multiple rendered pages at once
       frameEn.innerHTML = '';
-      frameImproved.innerHTML = '';
       frameFr.innerHTML = '';
 
       if (tab === 'en') {
         try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now(), frameEn); } catch(e){ frameEn.textContent='Load failed'; }
-      } else if (tab === 'improved') {
-        try { await loadHtmlInto('/api/bra-en-improved?massif=3&t=' + Date.now(), frameImproved); } catch(e){ frameImproved.textContent='Load failed'; }
       } else if (tab === 'fr') {
         try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now(), frameFr); } catch(e){ frameFr.textContent='Load failed'; }
       } else if (tab === 'pdf') {
