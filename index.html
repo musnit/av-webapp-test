@@ -19,6 +19,7 @@
     .card h3 { margin:10px 0 6px; font-size:16px; color:#bfdbfe; }
     .small { font-size:13px; color:#cbd5e1; }
     .xmlFrame { width:100%; height:42vh; border:0; border-radius:12px; background:#0b1324; margin-top:10px; }
+    .officialFrame { width:100%; height:55vh; border:0; border-radius:12px; background:#fff; margin-top:10px; }
   </style>
 </head>
 <body>
@@ -29,6 +30,7 @@
       <button id="open">Reload official PDF</button>
       <button id="openEn">Refresh English</button>
       <button id="openFrPretty">Show formatted FR bulletin</button>
+      <button id="openFrOfficial">Show official-XSLT attempt</button>
       <button id="openFrXml">Show raw XML (FR)</button>
       <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Official page (EN)</a>
     </div>
@@ -40,11 +42,17 @@
       <div>Raw official XML rendered as HTML for inspection:</div>
       <iframe id="xmlFr" class="xmlFrame" title="BRA XML FR"></iframe>
     </div>
+    <div class="card small">
+      <h3>Official-style render attempt (via Meteo-France XSLT)</h3>
+      <div>Using the official <code>bra.xslt</code> transform path. This is experimental.</div>
+      <iframe id="officialFr" class="officialFrame" title="BRA Official XSLT Attempt"></iframe>
+    </div>
   </div>
   <script>
     const pdf = document.getElementById('pdf');
     const en = document.getElementById('en');
     const xmlFr = document.getElementById('xmlFr');
+    const officialFr = document.getElementById('officialFr');
 
     function openPdf() {
       pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
@@ -52,6 +60,10 @@
 
     function loadFrPretty() {
       xmlFr.src = '/api/bra-fr-pretty?massif=3&t=' + Date.now();
+    }
+
+    function loadFrOfficial() {
+      officialFr.src = '/api/bra-fr-officialish?massif=3&t=' + Date.now();
     }
 
     function loadFrXml() {
@@ -84,10 +96,12 @@
     document.getElementById('open').addEventListener('click', openPdf);
     document.getElementById('openEn').addEventListener('click', loadEnglish);
     document.getElementById('openFrPretty').addEventListener('click', loadFrPretty);
+    document.getElementById('openFrOfficial').addEventListener('click', loadFrOfficial);
     document.getElementById('openFrXml').addEventListener('click', loadFrXml);
     openPdf();
     loadEnglish();
     loadFrPretty();
+    loadFrOfficial();
   </script>
 </body>
 </html>
