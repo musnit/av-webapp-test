@@ -28,7 +28,8 @@
     <div class="row">
       <button id="open">Reload official PDF</button>
       <button id="openEn">Refresh English</button>
-      <button id="openFrXml">Show full XML (FR)</button>
+      <button id="openFrPretty">Show formatted FR bulletin</button>
+      <button id="openFrXml">Show raw XML (FR)</button>
       <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Official page (EN)</a>
     </div>
     <div class="muted">Official Météo-France BRA PDF (French) + in-app English translation summary below.</div>
@@ -47,6 +48,10 @@
 
     function openPdf() {
       pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
+    }
+
+    function loadFrPretty() {
+      xmlFr.src = '/api/bra-fr-pretty?massif=3&t=' + Date.now();
     }
 
     function loadFrXml() {
@@ -78,10 +83,11 @@
 
     document.getElementById('open').addEventListener('click', openPdf);
     document.getElementById('openEn').addEventListener('click', loadEnglish);
+    document.getElementById('openFrPretty').addEventListener('click', loadFrPretty);
     document.getElementById('openFrXml').addEventListener('click', loadFrXml);
     openPdf();
     loadEnglish();
-    loadFrXml();
+    loadFrPretty();
   </script>
 </body>
 </html>
