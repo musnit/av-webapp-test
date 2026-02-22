@@ -10,12 +10,8 @@ export default async function handler(req, res) {
 <div id="out"></div>
 <script>
 (async()=>{
-  function escRe(s){return s.replace(/[.*+?^$()|[\]\\]/g,'\\$&')}
-  function swap(txt,from,to){ if(!from||!to) return txt; return txt.replace(new RegExp(escRe(from),'g'),to); }
   try {
-    const xmlUrl = ('${lang}'==='en')
-      ? '/api/bra-xml-en?massif=${massif}&t='+Date.now()
-      : '/api/bra-xml?massif=${massif}&t='+Date.now();
+    const xmlUrl = '/api/bra-xml?massif=${massif}&t='+Date.now();
     const [xmlTxt,xsltTxt]=await Promise.all([
       fetch(xmlUrl).then(r=>r.text()),
       fetch('/api/bra-xslt?lang=${lang}&t='+Date.now()).then(r=>r.text())
@@ -40,43 +36,15 @@ export default async function handler(req, res) {
     out.appendChild(frag);
 
     if('${lang}'==='en'){
-      let h=out.innerHTML;
-      const staticMap = [
-        ["Bulletin d'estimation du risque d'avalanche","Avalanche hazard bulletin"],
-        ["(valable en dehors des pistes balisées et ouvertes)","(valid outside marked/open runs)"],
-        ["MASSIF :","MASSIF:"],
-        ["rédigé le","issued on"],
-        ["Estimation des risques pour le","Risk estimate for"],
-        ["Stabilité du manteau neigeux jusqu'au","Snowpack stability until"],
-        ["au soir","in the evening"],
-        ["Situtation avalancheuse typique :","Typical avalanche problem:"],
-        ["Situation avalancheuse typique :","Typical avalanche problem:"],
-        ["Enneigement","Snowpack depth"],
-        ["Neige fraîche","Fresh snow"],
-        ["Qualité de la neige","Snow quality"],
-        ["Aperçu météo pour le","Weather outlook for"],
-        ["Météo","Weather"],
-        ["Déclenchements provoqués","Human-triggered avalanches"],
-        ["Départs spontanés","Natural avalanche activity"],
-        ["Pour consulter la vigilance en cours, veuillez vous rendre sur le site","To view current weather warnings, please visit"],
-        ["Indices de risque : 5 très fort - 4 fort - 3 marqué - 2 limité - 1 faible","Danger levels: 5 very high - 4 high - 3 considerable - 2 moderate - 1 low"],
-        ["Epaisseur de neige hors-piste","Off-piste snow depth"],
-        ["Épaisseur de neige hors-piste","Off-piste snow depth"],
-        ["Risque d'avalanche","Avalanche danger"],
-        ["Risque détaillé","Detailed danger"],
-        ["Graphe d'enneigement","Snow depth chart"],
-        ["Graphe de neige fraîche","Fresh snow chart"],
-        ["Enneigement Nord","North-facing snow depth"],
-        ["Enneigement sud","South-facing snow depth"],
-        ["Enneigement","Snow depth"],
-        ["Isotherme 0°C et limite pluie neige","Freezing level and rain/snow line"],
-        ["samedi","Saturday"],["dimanche","Sunday"],["lundi","Monday"],["mardi","Tuesday"],["mercredi","Wednesday"],["jeudi","Thursday"],["vendredi","Friday"],
-        ["janvier","January"],["février","February"],["mars","March"],["avril","April"],["mai","May"],["juin","June"],["juillet","July"],["août","August"],["septembre","September"],["octobre","October"],["novembre","November"],["décembre","December"],
-        ["Neige fraîche","Fresh snow"],["Neige ventée","Wind slab"],["Sous-couche fragile persistante","Persistent weak layer"],["Neige humide","Wet snow"],["Avalanches de fond","Gliding snow"],["Corniches","Cornices"]
-      ];
-      staticMap.forEach(([fr,en])=>{ h=swap(h,fr,en); });
-      out.innerHTML=h;
-      document.getElementById('status').textContent='Official XSLT render attempt (EN, full-XML translated)';
+      const resp = await fetch('/api/translate-html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: out.innerHTML })
+      });
+      const j = await resp.json();
+      if (!resp.ok) throw new Error(j.error || 'HTML translation failed');
+      out.innerHTML = j.translatedHtml || out.innerHTML;
+      document.getElementById('status').textContent='Official XSLT render attempt (EN via translated HTML)';
     } else {
       document.getElementById('status').textContent='Official XSLT render attempt (FR)';
     }
