@@ -2,8 +2,21 @@
   "name": "Mont-Blanc Avalanche Bulletin",
   "short_name": "Avalanche",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0b1324",
   "theme_color": "#0b1324",
-  "icons": []
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }

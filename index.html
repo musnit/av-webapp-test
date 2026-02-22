@@ -2,13 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Mont-Blanc Avalanche Bulletin</title>
   <meta name="theme-color" content="#0b1324" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Avalanche" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="/icon-512.png" />
   <link rel="manifest" href="/manifest.json" />
   <style>
     body { margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif; background:#0b1324; color:#fff; }
-    .wrap { max-width:900px; margin:0 auto; padding:14px; }
+    .wrap { max-width:900px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom)); }
     h1 { font-size:20px; margin:8px 0 12px; }
     .row { display:flex; gap:8px; flex-wrap:wrap; }
     button,a.btn { background:#2dd4bf; color:#042f2e; border:0; padding:10px 12px; border-radius:10px; font-weight:700; text-decoration:none; }
