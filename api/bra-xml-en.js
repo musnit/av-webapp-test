@@ -17,7 +17,8 @@ function decodeCdata(s = '') {
 }
 
 function encodeCdata(s = '') {
-  return `<![CDATA[${s}]]>`;
+  const safe = String(s).replaceAll(']]>', ']]]]><![CDATA[>');
+  return `<![CDATA[${safe}]]>`;
 }
 
 function pickTag(xml, tag) {
@@ -104,7 +105,7 @@ export default async function handler(req, res) {
     const riskComment = (frXml.match(/<RISQUE[^>]*\bCOMMENTAIRE="([^"]*)"/i)?.[1]) || '';
     if (riskComment) { sectionRefs.push({ type: 'attr', tag: 'RISQUE', attr: 'COMMENTAIRE' }); sections.push(riskComment); }
 
-    const tagSingles = ['ACCIDENTEL', 'NATUREL', 'RESUME', 'RisqueJ2', 'CommentaireRisqueJ2', 'TITRE', 'TEXTESANSTITRE', 'TEXTE'];
+    const tagSingles = ['ACCIDENTEL', 'NATUREL', 'RESUME', 'RisqueJ2', 'CommentaireRisqueJ2', 'TITRE', 'TEXTESANSTITRE'];
     for (const t of tagSingles) {
       const v = pickTag(frXml, t);
       if (v) { sectionRefs.push({ type: 'tag', tag: t, cdata: true }); sections.push(decodeCdata(v)); }
@@ -116,7 +117,7 @@ export default async function handler(req, res) {
     const meteoComment = frXml.match(/<METEO[^>]*>[\s\S]*?<COMMENTAIRE>([\s\S]*?)<\/COMMENTAIRE>/i)?.[1];
     if (meteoComment) { sectionRefs.push({ type: 'meteoComment' }); sections.push(decodeCdata(meteoComment)); }
 
-    const translationVersion = 'xml-section-v1';
+    const translationVersion = 'xml-section-v2-safe-tags';
     const contentHash = hash(translationVersion + '|' + JSON.stringify(sections));
     const blobPath = `translations/bra-xml-en-sections/${massif}/${contentHash}.xml`;
 
