@@ -32,7 +32,11 @@ function hashPayload(obj) {
 }
 
 async function readBlobJson(url) {
-  const r = await fetch(url);
+  const r = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`
+    }
+  });
   if (!r.ok) throw new Error(`Blob read failed: ${r.status}`);
   return r.json();
 }
@@ -116,7 +120,6 @@ export default async function handler(req, res) {
       source: hashBase,
       translation
     }, null, 2), {
-      access: 'public',
       contentType: 'application/json',
       addRandomSuffix: false
     });
