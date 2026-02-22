@@ -20,18 +20,18 @@ async function trBatch(texts) {
     },
     body: JSON.stringify({
       model: 'gpt-5-nano',
-      response_format: { type: 'json_object' },
       messages: [
-        { role: 'system', content: 'Translate avalanche bulletin text from French to accurate English. Return strict JSON only.' },
+        { role: 'system', content: 'Translate avalanche bulletin text from French to accurate English. Return strict JSON only: {"translations":[...]}' },
         { role: 'user', content: `Return JSON {"translations": [...]} same order and length. Keep numbers/units.\n${JSON.stringify(texts)}` }
       ]
     })
   });
   if (!r.ok) throw new Error(`translate failed ${r.status}`);
   const j = await r.json();
-  const raw = j?.choices?.[0]?.message?.content || '{}';
-  const parsed = JSON.parse(raw);
-  return parsed.translations || texts;
+  const raw = (j?.choices?.[0]?.message?.content || '').trim();
+  const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const parsed = JSON.parse(cleaned || '{}');
+  return Array.isArray(parsed.translations) ? parsed.translations : texts;
 }
 
 export default async function handler(req, res) {
@@ -56,8 +56,14 @@ export default async function handler(req, res) {
     };
 
     const keys = ['riskComment','title','accidental','natural','summary','stability','quality','meteo'];
-    const translated = await trBatch(keys.map(k => data[k] || ''));
-    keys.forEach((k,i)=> data[k+'En'] = translated[i] || data[k] || '');
+    let translationError = '';
+    try {
+      const translated = await trBatch(keys.map(k => data[k] || ''));
+      keys.forEach((k,i)=> data[k+'En'] = translated[i] || data[k] || '');
+    } catch (e) {
+      translationError = e.message;
+      keys.forEach((k)=> data[k+'En'] = data[k] || '');
+    }
 
     const h = `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
@@ -66,7 +72,7 @@ body{font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:#
 h1{margin:0 0 6px;font-size:24px}.muted{color:#475569;font-size:13px}.risk{font-size:30px;font-weight:800}.grid{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:860px){.grid{grid-template-columns:1fr 1fr}} h3{margin:0 0 6px} p{margin:0;white-space:pre-wrap;line-height:1.42}
 </style></head><body><div class="wrap">
-<div class="card"><h1>Avalanche hazard bulletin</h1><div class="muted">Massif: <b>${data.massif}</b> • Issued: ${data.issued} • Valid until: ${data.valid}</div><div class="risk">${data.risk}/5</div><div>${data.riskCommentEn}</div></div>
+<div class="card"><h1>Avalanche hazard bulletin</h1><div class="muted">Massif: <b>${data.massif}</b> • Issued: ${data.issued} • Valid until: ${data.valid}</div><div class="risk">${data.risk}/5</div><div>${data.riskCommentEn}</div>${translationError ? `<div class="muted" style="margin-top:6px;color:#b91c1c">Translation fallback used: ${translationError}</div>` : ''}</div>
 <div class="grid"><div class="card"><h3>Human-triggered avalanches</h3><p>${data.accidentalEn}</p></div><div class="card"><h3>Natural avalanche activity</h3><p>${data.naturalEn}</p></div></div>
 <div class="card"><h3>Main message</h3><p>${data.titleEn}</p></div>
 <div class="card"><h3>Summary</h3><p>${data.summaryEn}</p></div>
