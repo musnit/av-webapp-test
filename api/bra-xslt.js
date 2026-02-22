@@ -44,44 +44,7 @@ function safeHeuristicXsltEn(frXslt) {
   return s;
 }
 
-async function translateXslt(frXslt) {
-  const prompt = `Translate this French XSLT template to English UI text while keeping valid XSLT.
-Rules:
-- Keep XML/XSL structure, tags, attributes, expressions, IDs, class names, and logic unchanged.
-- Translate only human-readable French literal text nodes and French literal string values.
-- Do not alter URLs.
-- Return only valid XSLT XML.
-
-XSLT:\n${frXslt}`;
-
-  const r = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-5-nano',
-      messages: [
-        { role: 'system', content: 'You are an XSLT translator. Return XSLT XML only.' },
-        { role: 'user', content: prompt }
-      ]
-    })
-  });
-
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`LLM XSLT translation failed: ${r.status} ${t.slice(0, 180)}`);
-  }
-
-  const j = await r.json();
-  let out = j?.choices?.[0]?.message?.content || '';
-  out = out.trim().replace(/^```xml\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
-  if (!out.startsWith('<?xml') && !out.includes('<xsl:stylesheet')) {
-    throw new Error('LLM did not return valid XSLT');
-  }
-  return out;
-}
+// LLM XSLT translation removed intentionally: it can produce malformed XML.
 
 export default async function handler(req, res) {
   try {
@@ -96,7 +59,6 @@ export default async function handler(req, res) {
       return res.status(200).send(frXslt);
     }
 
-    if (!process.env.OPENAI_API_KEY) return res.status(500).send('Missing OPENAI_API_KEY');
     if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(500).send('Missing BLOB_READ_WRITE_TOKEN');
 
     const versionTag = 'xslt-en-v2-safe';
@@ -113,13 +75,7 @@ export default async function handler(req, res) {
       // miss
     }
 
-    let enXslt = '';
-    try {
-      enXslt = await translateXslt(frXslt);
-      if (!enXslt.includes('<xsl:stylesheet')) throw new Error('invalid xslt output');
-    } catch {
-      enXslt = safeHeuristicXsltEn(frXslt);
-    }
+    const enXslt = safeHeuristicXsltEn(frXslt);
 
     await put(blobPath, enXslt, {
       access: 'public',
