@@ -1,68 +1,50 @@
-function svgForRisk(level = '3') {
-  const colors = { '1': '#22c55e', '2': '#84cc16', '3': '#f59e0b', '4': '#f97316', '5': '#ef4444' };
-  const c = colors[level] || '#94a3b8';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 110 110">
-    <rect x="5" y="5" width="100" height="100" rx="14" fill="${c}" />
-    <text x="55" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="white">${level}</text>
-  </svg>`;
-}
+import fs from 'fs';
+import path from 'path';
 
-function tinyIcon(label = '?') {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-    <rect x="2" y="2" width="44" height="44" rx="10" fill="#1f2937"/>
-    <text x="24" y="29" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#e5e7eb">${label}</text>
-  </svg>`;
-}
+const BASE = path.join(process.cwd(), 'assets', 'eaws-curated');
 
-function satIcon(level = '1') {
-  const colors = { '1': '#2563eb', '2': '#7c3aed', '3': '#0ea5e9', '4': '#f59e0b', '5': '#ef4444', '6': '#059669' };
-  const labels = {
-    '1': 'Neige fraîche',
-    '2': 'Neige ventée',
-    '3': 'Sous-couche fragile',
-    '4': 'Neige humide',
-    '5': 'Avalanches de fond',
-    '6': 'Glissement'
-  };
-  const c = colors[level] || '#64748b';
-  const l = labels[level] || `SAT ${level}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="56" viewBox="0 0 220 56">
-    <rect x="2" y="2" width="216" height="52" rx="10" fill="${c}"/>
-    <text x="110" y="33" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="white">${l}</text>
-  </svg>`;
+const MAP = {
+  // Risk blocks from XSLT (R1..R5)
+  'R1.PNG': 'Icon-Avalanche-Danger-Level-Dry-Snow-1-EAWS.svg',
+  'R2.PNG': 'Icon-Avalanche-Danger-Level-Dry-Snow-2-EAWS.svg',
+  'R3.PNG': 'Icon-Avalanche-Danger-Level-Dry-Snow-3-EAWS.svg',
+  'R4.PNG': 'Icon-Avalanche-Danger-Level-Dry-Snow-4-5-EAWS.svg',
+  'R5.PNG': 'Icon-Avalanche-Danger-Level-Dry-Snow-4-5-EAWS.svg',
+
+  // SAT mapping (French BRA SAT1..SAT6 -> closest EAWS problems)
+  'SAT1.PNG': 'Icon-Avalanche-Problem-New-Snow-EAWS.svg',
+  'SAT2.PNG': 'Icon-Avalanche-Problem-Wind-Slab-EAWS.svg',
+  'SAT3.PNG': 'Icon-Avalanche-Problem-Persistent-Weak-Layer-EAWS.svg',
+  'SAT4.PNG': 'Icon-Avalanche-Problem-Wet-Snow-EAWS.svg',
+  'SAT5.PNG': 'Icon-Avalanche-Problem-Gliding-Snow-EAWS.svg',
+  'SAT6.PNG': 'Icon-Avalanche-Problem-Cornices.svg',
+};
+
+function fallbackSvg(label = '•') {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="56" viewBox="0 0 120 56"><rect x="2" y="2" width="116" height="52" rx="10" fill="#334155"/><text x="60" y="34" text-anchor="middle" font-family="Arial" font-size="18" fill="#fff">${label}</text></svg>`;
 }
 
 export default async function handler(req, res) {
-  const name = String(req.query.name || '').toUpperCase();
+  try {
+    const name = String(req.query.name || '').toUpperCase();
+    const rel = MAP[name];
 
-  let svg = '';
-  const riskMatch = name.match(/^R([1-5])\.PNG$/);
-  const satMatch = name.match(/^SAT([1-6])\.PNG$/);
-  if (riskMatch) {
-    svg = svgForRisk(riskMatch[1]);
-  } else if (satMatch) {
-    svg = satIcon(satMatch[1]);
-  } else if (name === 'VENT.PNG') {
-    svg = tinyIcon('Wind');
-  } else if (name === 'WW.PNG') {
-    svg = tinyIcon('Wx');
-  } else if (name === 'LPN.PNG') {
-    svg = tinyIcon('LPN');
-  } else if (name === 'ISO0.PNG') {
-    svg = tinyIcon('0°');
-  } else if (name === 'BAISSE.PNG') {
-    svg = tinyIcon('↓');
-  } else if (name === 'HAUSSE.PNG') {
-    svg = tinyIcon('↑');
-  } else if (name === 'STABLE2.PNG') {
-    svg = tinyIcon('=');
-  } else if (name === 'LOGO_METEOFRANCE.PNG') {
-    svg = tinyIcon('MF');
-  } else {
-    svg = tinyIcon('•');
+    if (rel) {
+      const abs = path.join(BASE, rel);
+      if (fs.existsSync(abs)) {
+        const svg = fs.readFileSync(abs, 'utf8');
+        res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        return res.status(200).send(svg);
+      }
+    }
+
+    // keep tiny placeholders for misc icons in XSLT
+    const short = name.replace('.PNG', '') || '?';
+    res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    return res.status(200).send(fallbackSvg(short));
+  } catch (err) {
+    return res.status(500).send(`Error: ${err.message}`);
   }
-
-  res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  return res.status(200).send(svg);
 }
