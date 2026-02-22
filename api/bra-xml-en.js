@@ -1,14 +1,15 @@
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
+import { put, head } from '@vercel/blob';
 import { getBraBlob } from './_bra-utils.js';
 
 function hash(s) {
   return crypto.createHash('sha256').update(s).digest('hex');
 }
 
-function cachePath(massif, h) {
-  return path.join('/tmp', 'bra-xml-en-cache', massif, `${h}.xml`);
+async function readBlobText(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Blob read failed: ${r.status}`);
+  return r.text();
 }
 
 async function translateXml(xml) {
@@ -56,19 +57,29 @@ export default async function handler(req, res) {
     }
     const massif = String(req.query.massif || '3').replace(/[^0-9]/g, '') || '3';
     const frXml = await (await getBraBlob(massif, 'xml')).text();
-    const h = hash(frXml);
-    const p = cachePath(massif, h);
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).send('Missing BLOB_READ_WRITE_TOKEN');
+    }
 
-    if (fs.existsSync(p)) {
-      const cached = fs.readFileSync(p, 'utf8');
+    const h = hash(frXml);
+    const blobPath = `translations/bra-xml-en/${massif}/${h}.xml`;
+
+    try {
+      const meta = await head(blobPath);
+      const cached = await readBlobText(meta.url);
       res.setHeader('X-Translation-Cache', 'hit');
       res.setHeader('Content-Type', 'text/xml; charset=utf-8');
       return res.status(200).send(cached);
+    } catch {
+      // miss
     }
 
     const enXml = await translateXml(frXml);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, enXml);
+    await put(blobPath, enXml, {
+      access: 'public',
+      contentType: 'text/xml; charset=utf-8',
+      addRandomSuffix: false
+    });
 
     res.setHeader('X-Translation-Cache', 'miss');
     res.setHeader('Content-Type', 'text/xml; charset=utf-8');

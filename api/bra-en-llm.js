@@ -1,6 +1,5 @@
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
+import { put, head } from '@vercel/blob';
 import { getBraBlob } from './_bra-utils.js';
 
 function pickTag(xml, tag) {
@@ -32,24 +31,10 @@ function hashPayload(obj) {
   return crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
 }
 
-function cachePathFor(massif, hash) {
-  return path.join('/tmp', 'bra-translation-cache', massif, `${hash}.json`);
-}
-
-function readLocalCache(massif, hash) {
-  try {
-    const p = cachePathFor(massif, hash);
-    if (!fs.existsSync(p)) return null;
-    return JSON.parse(fs.readFileSync(p, 'utf8'));
-  } catch {
-    return null;
-  }
-}
-
-function writeLocalCache(massif, hash, payload) {
-  const p = cachePathFor(massif, hash);
-  fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(payload, null, 2));
+async function readBlobJson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Blob read failed: ${r.status}`);
+  return r.json();
 }
 
 async function translateWithLlm(frObj) {
@@ -109,21 +94,35 @@ export default async function handler(req, res) {
     };
     const contentHash = hashPayload(hashBase);
 
-    const cachedObj = readLocalCache(massif, contentHash);
-    if (cachedObj?.translation) {
-      return res.status(200).json({ ...fr, ...cachedObj.translation, cached: true, contentHash, cacheBackend: 'local-tmp' });
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({ error: 'Missing BLOB_READ_WRITE_TOKEN env var' });
+    }
+
+    const blobPath = `translations/bra/${massif}/${contentHash}.json`;
+    try {
+      const meta = await head(blobPath);
+      const cached = await readBlobJson(meta.url);
+      if (cached?.translation) {
+        return res.status(200).json({ ...fr, ...cached.translation, cached: true, contentHash, cacheBackend: 'vercel-blob' });
+      }
+    } catch {
+      // miss
     }
 
     const translation = await translateWithLlm(fr);
-    writeLocalCache(massif, contentHash, {
+    await put(blobPath, JSON.stringify({
       createdAt: new Date().toISOString(),
       contentHash,
       massif,
       source: hashBase,
       translation
+    }, null, 2), {
+      access: 'public',
+      contentType: 'application/json',
+      addRandomSuffix: false
     });
 
-    return res.status(200).json({ ...fr, ...translation, cached: false, contentHash, cacheBackend: 'local-tmp' });
+    return res.status(200).json({ ...fr, ...translation, cached: false, contentHash, cacheBackend: 'vercel-blob' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
