@@ -15,6 +15,9 @@
     .muted { color:#cbd5e1; font-size:13px; margin-top:8px; }
     iframe { width:100%; height:68vh; border:0; border-radius:12px; background:#fff; margin-top:12px; }
     .pill { background:#1e293b; color:#93c5fd; border-radius:999px; padding:4px 8px; font-size:12px; }
+    .alert { margin-top:10px; padding:10px 12px; border-radius:10px; font-size:13px; display:none; }
+    .alert.warn { background:#7f1d1d; color:#fee2e2; border:1px solid #ef4444; }
+    .alert.ok { background:#052e16; color:#dcfce7; border:1px solid #22c55e; }
     .card { margin-top:12px; background:#111827; border:1px solid #334155; border-radius:12px; padding:12px; line-height:1.4; }
     .card h3 { margin:10px 0 6px; font-size:16px; color:#bfdbfe; }
     .small { font-size:13px; color:#cbd5e1; }
@@ -32,6 +35,7 @@
 <body>
   <div class="wrap">
     <div class="pill">One tap • Official bulletin PDF + English summary</div>
+    <div id="validation" class="alert"></div>
     <h1>Mont-Blanc Avalanche Bulletin</h1>
     <div class="row">
       <button id="open">Reload official PDF</button>
@@ -108,6 +112,7 @@
     const en = document.getElementById('en');
     const xmlFr = document.getElementById('xmlFr');
     const officialFr = document.getElementById('officialFr');
+    const validation = document.getElementById('validation');
 
     function openPdf() {
       pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
@@ -123,6 +128,25 @@
 
     function loadFrXml() {
       xmlFr.src = '/api/bra-fr?massif=3&t=' + Date.now();
+    }
+
+    async function validateMapping() {
+      try {
+        const r = await fetch('/api/bra-validate?massif=3&t=' + Date.now());
+        const j = await r.json();
+        validation.style.display = 'block';
+        if (!j.ok) {
+          validation.className = 'alert warn';
+          validation.textContent = '⚠️ Mapping warning: ' + (j.warnings || ['Unknown validation issue']).join(' · ');
+        } else {
+          validation.className = 'alert ok';
+          validation.textContent = `✅ Mapping check passed (RISQUEMAXI=${j.risk}, SAT1=${j.sat1 || '-'}, SAT2=${j.sat2 || '-'})`;
+        }
+      } catch (e) {
+        validation.style.display = 'block';
+        validation.className = 'alert warn';
+        validation.textContent = '⚠️ Mapping validation failed: ' + e.message;
+      }
     }
 
     async function loadEnglish() {
@@ -153,6 +177,7 @@
     document.getElementById('openFrPretty').addEventListener('click', loadFrPretty);
     document.getElementById('openFrOfficial').addEventListener('click', loadFrOfficial);
     document.getElementById('openFrXml').addEventListener('click', loadFrXml);
+    validateMapping();
     openPdf();
     loadEnglish();
     loadFrPretty();
