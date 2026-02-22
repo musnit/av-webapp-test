@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const xsl=parser.parseFromString(xsltTxt,'text/xml');
     const p=new XSLTProcessor();
     p.importStylesheet(xsl);
-    p.setParameter(null,'urlBlob',window.location.origin + '/api/bra-pdf?massif=${massif}&t=' + Date.now() + '&raw=1');
+    p.setParameter(null,'urlBlob',window.location.origin + '/api/bra-blob?blob_filename=');
     p.setParameter(null,'dateExp',new Date().toString());
     const frag=p.transformToFragment(xml,document);
     document.getElementById('out').appendChild(frag);

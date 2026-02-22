@@ -23,13 +23,13 @@ export async function getMfToken() {
   return rot13LettersOnly(decodeURIComponent(mfsession));
 }
 
-export async function getBraBlob(massif = '3', ext = 'pdf') {
+export async function fetchBlobByFilename(blobFilename) {
   const token = await getMfToken();
-  const pdfUrl = new URL('https://rwg.meteofrance.com/gdss/v1/metronome_bra/blob');
-  pdfUrl.searchParams.set('sort-results-by', '-blob_creation_time');
-  pdfUrl.searchParams.set('blob_filename', `BRA_${massif}.${ext}`);
+  const url = new URL('https://rwg.meteofrance.com/gdss/v1/metronome_bra/blob');
+  url.searchParams.set('sort-results-by', '-blob_creation_time');
+  url.searchParams.set('blob_filename', blobFilename);
 
-  const resp = await fetch(pdfUrl, {
+  const resp = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!resp.ok) {
@@ -37,4 +37,8 @@ export async function getBraBlob(massif = '3', ext = 'pdf') {
     throw new Error(`Upstream fetch failed: ${resp.status} ${txt.slice(0, 200)}`);
   }
   return resp;
+}
+
+export async function getBraBlob(massif = '3', ext = 'pdf') {
+  return fetchBlobByFilename(`BRA_${massif}.${ext}`);
 }
