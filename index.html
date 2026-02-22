@@ -105,27 +105,38 @@
         s.textContent = oldScript.textContent;
         oldScript.replaceWith(s);
       });
-      el.querySelectorAll('*').forEach(n=>{ n.style.maxWidth = n.style.maxWidth || '100%'; });
     }
 
-    async function loadFrames(){
-      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now(), frameEn); } catch(e){ frameEn.textContent='Load failed'; }
-      try { await loadHtmlInto('/api/bra-en-improved?massif=3&t=' + Date.now(), frameImproved); } catch(e){ frameImproved.textContent='Load failed'; }
-      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now(), frameFr); } catch(e){ frameFr.textContent='Load failed'; }
-      pdfLink.href = '/api/bra-pdf?massif=3&t=' + Date.now();
+    async function loadTabContent(tab){
+      // avoid duplicate IDs/scripts from multiple rendered pages at once
+      frameEn.innerHTML = '';
+      frameImproved.innerHTML = '';
+      frameFr.innerHTML = '';
+
+      if (tab === 'en') {
+        try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now(), frameEn); } catch(e){ frameEn.textContent='Load failed'; }
+      } else if (tab === 'improved') {
+        try { await loadHtmlInto('/api/bra-en-improved?massif=3&t=' + Date.now(), frameImproved); } catch(e){ frameImproved.textContent='Load failed'; }
+      } else if (tab === 'fr') {
+        try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now(), frameFr); } catch(e){ frameFr.textContent='Load failed'; }
+      } else if (tab === 'pdf') {
+        pdfLink.href = '/api/bra-pdf?massif=3&t=' + Date.now();
+      }
     }
 
     document.querySelectorAll('.tab').forEach(btn=>{
-      btn.addEventListener('click',()=>{
+      btn.addEventListener('click', async ()=>{
         document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
         document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('panel-'+tab).classList.add('active');
+        await loadTabContent(tab);
       });
     });
 
     validateMapping();
-    loadFrames();
+    loadTabContent('en');
   </script>
 </body>
 </html>
