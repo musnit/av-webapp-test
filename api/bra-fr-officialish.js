@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 <title>BRA FR via XSLT</title>
 <style>html,body{margin:0;padding:0;background:#0b1324;color:#e2e8f0}body{padding:10px;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif}#status{font-size:13px;color:#94a3b8;margin-bottom:8px}#out img{max-width:100%;height:auto}#out .bloc1{display:flex !important;flex-direction:row !important;align-items:center;gap:10px;flex-wrap:nowrap}#out .risqueMaxi,#out .figurineRisque,#out .figurinePente{flex:0 0 auto}#out .risqueMaxi img{width:76px !important;height:76px !important;object-fit:contain}#out .figurineRisque img,#out .figurinePente img{max-height:120px !important;width:auto !important;object-fit:contain}#out .pictoSAT{width:28px !important;height:28px !important;vertical-align:middle}#out table img{max-height:28px !important;width:auto !important}#out .bloc2,#out .col1,#out .col2{overflow:hidden}</style>
 </head><body>
-<div id="status">Rendering with official XSLT…</div>
+<div id="status">Loading…</div>
 <div id="out"></div>
 <script>
 (async()=>{
@@ -50,10 +50,10 @@ export default async function handler(req, res) {
       if (!resp.ok) throw new Error(j.error || 'HTML translation failed');
       out.innerHTML = j.translatedHtml || tmp.innerHTML;
       tmp.remove();
-      document.getElementById('status').textContent='English translation ready';
+      document.getElementById('status').style.display='none';
     } else {
       out.appendChild(frag);
-      document.getElementById('status').textContent='Official XSLT render attempt (FR)';
+      document.getElementById('status').style.display='none';
     }
   } catch(e){
     document.getElementById('status').textContent='XSLT render failed: '+e.message;
