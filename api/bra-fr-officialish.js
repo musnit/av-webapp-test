@@ -33,15 +33,25 @@ export default async function handler(req, res) {
       const tr=await fetch('/api/bra-en-llm?massif=${massif}&t='+Date.now()).then(r=>r.json());
       let h=out.innerHTML;
       // Static labels
-      h=swap(h,"Bulletin d'estimation du risque d'avalanche","Avalanche hazard bulletin");
-      h=swap(h,"(valable en dehors des pistes balisées et ouvertes)","(valid outside marked/open runs)");
-      h=swap(h,"MASSIF :","MASSIF:");
-      h=swap(h,"rédigé le","issued on");
-      h=swap(h,"Estimation des risques pour le","Risk estimate for");
-      h=swap(h,"Stabilité du manteau neigeux jusqu'au","Snowpack stability until");
-      h=swap(h,"au soir","in the evening");
-      h=swap(h,"Situtation avalancheuse typique :","Typical avalanche problem:");
-      h=swap(h,"Indices de risque : 5 très fort - 4 fort - 3 marqué - 2 limité - 1 faible","Danger levels: 5 very high - 4 high - 3 considerable - 2 moderate - 1 low");
+      const staticMap = [
+        ["Bulletin d'estimation du risque d'avalanche","Avalanche hazard bulletin"],
+        ["(valable en dehors des pistes balisées et ouvertes)","(valid outside marked/open runs)"],
+        ["MASSIF :","MASSIF:"],
+        ["rédigé le","issued on"],
+        ["Estimation des risques pour le","Risk estimate for"],
+        ["Stabilité du manteau neigeux jusqu'au","Snowpack stability until"],
+        ["au soir","in the evening"],
+        ["Situtation avalancheuse typique :","Typical avalanche problem:"],
+        ["Situation avalancheuse typique :","Typical avalanche problem:"],
+        ["Enneigement","Snowpack depth"],
+        ["Neige fraîche","Fresh snow"],
+        ["Qualité de la neige","Snow quality"],
+        ["Météo","Weather"],
+        ["Déclenchements provoqués","Human-triggered avalanches"],
+        ["Départs spontanés","Natural avalanche activity"],
+        ["Indices de risque : 5 très fort - 4 fort - 3 marqué - 2 limité - 1 faible","Danger levels: 5 very high - 4 high - 3 considerable - 2 moderate - 1 low"]
+      ];
+      staticMap.forEach(([fr,en])=>{ h=swap(h,fr,en); });
 
       // Dynamic text blocks (LLM)
       h=swap(h,tr.riskComment||'',tr.riskCommentEn||'');
@@ -51,6 +61,11 @@ export default async function handler(req, res) {
       h=swap(h,tr.meteo||'',tr.meteoEn||'');
 
       out.innerHTML=h;
+
+      // Selector-level overrides (more robust than string swap)
+      const st = out.querySelector('#stabilite');
+      if (st && tr.stabilityEn) st.textContent = tr.stabilityEn;
+
       document.getElementById('status').textContent='Official XSLT render attempt (EN)';
     } else {
       document.getElementById('status').textContent='Official XSLT render attempt (FR)';
