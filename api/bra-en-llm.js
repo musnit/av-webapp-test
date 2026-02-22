@@ -1,5 +1,6 @@
 import crypto from 'crypto';
-import { put, head } from '@vercel/blob';
+import fs from 'fs';
+import path from 'path';
 import { getBraBlob } from './_bra-utils.js';
 
 function pickTag(xml, tag) {
@@ -31,14 +32,24 @@ function hashPayload(obj) {
   return crypto.createHash('sha256').update(JSON.stringify(obj)).digest('hex');
 }
 
-async function readBlobJson(url) {
-  const r = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`
-    }
-  });
-  if (!r.ok) throw new Error(`Blob read failed: ${r.status}`);
-  return r.json();
+function cachePathFor(massif, hash) {
+  return path.join('/tmp', 'bra-translation-cache', massif, `${hash}.json`);
+}
+
+function readLocalCache(massif, hash) {
+  try {
+    const p = cachePathFor(massif, hash);
+    if (!fs.existsSync(p)) return null;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalCache(massif, hash, payload) {
+  const p = cachePathFor(massif, hash);
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(payload, null, 2));
 }
 
 async function translateWithLlm(frObj) {
@@ -83,9 +94,6 @@ export default async function handler(req, res) {
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var' });
     }
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return res.status(500).json({ error: 'Missing BLOB_READ_WRITE_TOKEN env var' });
-    }
 
     const massif = String(req.query.massif || '3').replace(/[^0-9]/g, '') || '3';
     const xml = await (await getBraBlob(massif, 'xml')).text();
@@ -102,30 +110,21 @@ export default async function handler(req, res) {
     };
     const contentHash = hashPayload(hashBase);
 
-    const blobPath = `translations/bra/${massif}/${contentHash}.json`;
-
-    try {
-      const meta = await head(blobPath);
-      const cached = await readBlobJson(meta.url);
-      return res.status(200).json({ ...fr, ...cached.translation, cached: true, contentHash, cachePath: blobPath });
-    } catch {
-      // cache miss
+    const cachedObj = readLocalCache(massif, contentHash);
+    if (cachedObj?.translation) {
+      return res.status(200).json({ ...fr, ...cachedObj.translation, cached: true, contentHash, cacheBackend: 'local-tmp' });
     }
 
     const translation = await translateWithLlm(fr);
-    await put(blobPath, JSON.stringify({
+    writeLocalCache(massif, contentHash, {
       createdAt: new Date().toISOString(),
       contentHash,
       massif,
       source: hashBase,
       translation
-    }, null, 2), {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: false
     });
 
-    return res.status(200).json({ ...fr, ...translation, cached: false, contentHash, cachePath: blobPath });
+    return res.status(200).json({ ...fr, ...translation, cached: false, contentHash, cacheBackend: 'local-tmp' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
