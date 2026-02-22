@@ -18,6 +18,7 @@
     .card { margin-top:12px; background:#111827; border:1px solid #334155; border-radius:12px; padding:12px; line-height:1.4; }
     .card h3 { margin:10px 0 6px; font-size:16px; color:#bfdbfe; }
     .small { font-size:13px; color:#cbd5e1; }
+    .xmlFrame { width:100%; height:42vh; border:0; border-radius:12px; background:#0b1324; margin-top:10px; }
   </style>
 </head>
 <body>
@@ -27,18 +28,29 @@
     <div class="row">
       <button id="open">Reload official PDF</button>
       <button id="openEn">Refresh English</button>
+      <button id="openFrXml">Show full XML (FR)</button>
       <a class="btn" href="https://translate.google.com/translate?sl=fr&tl=en&u=https%3A%2F%2Fmeteofrance.com%2Fmeteo-montagne%2Falpes-du-nord%2Frisques-avalanche" target="_blank" rel="noopener">Official page (EN)</a>
     </div>
     <div class="muted">Official Météo-France BRA PDF (French) + in-app English translation summary below.</div>
     <iframe id="pdf" title="BRA PDF"></iframe>
     <div id="en" class="card small">Loading English summary…</div>
+    <div class="card small">
+      <h3>Full XML (French)</h3>
+      <div>Raw official XML rendered as HTML for inspection:</div>
+      <iframe id="xmlFr" class="xmlFrame" title="BRA XML FR"></iframe>
+    </div>
   </div>
   <script>
     const pdf = document.getElementById('pdf');
     const en = document.getElementById('en');
+    const xmlFr = document.getElementById('xmlFr');
 
     function openPdf() {
       pdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
+    }
+
+    function loadFrXml() {
+      xmlFr.src = '/api/bra-fr?massif=3&t=' + Date.now();
     }
 
     async function loadEnglish() {
@@ -66,8 +78,10 @@
 
     document.getElementById('open').addEventListener('click', openPdf);
     document.getElementById('openEn').addEventListener('click', loadEnglish);
+    document.getElementById('openFrXml').addEventListener('click', loadFrXml);
     openPdf();
     loadEnglish();
+    loadFrXml();
   </script>
 </body>
 </html>
