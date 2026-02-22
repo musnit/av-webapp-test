@@ -33,19 +33,26 @@ export default async function handler(req, res) {
     p.setParameter(null,'dateExp',new Date().toString());
     const frag=p.transformToFragment(xml,document);
     if (!frag || !(frag instanceof Node)) throw new Error('XSLT transform returned empty/non-node fragment');
-    out.appendChild(frag);
 
     if('${lang}'==='en'){
+      // Render off-screen first so no French flashes before EN is ready.
+      const tmp = document.createElement('div');
+      tmp.style.display = 'none';
+      tmp.appendChild(frag);
+      document.body.appendChild(tmp);
+
       const resp = await fetch('/api/translate-html', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: out.innerHTML })
+        body: JSON.stringify({ html: tmp.innerHTML })
       });
       const j = await resp.json();
       if (!resp.ok) throw new Error(j.error || 'HTML translation failed');
-      out.innerHTML = j.translatedHtml || out.innerHTML;
-      document.getElementById('status').textContent='Official XSLT render attempt (EN via translated HTML)';
+      out.innerHTML = j.translatedHtml || tmp.innerHTML;
+      tmp.remove();
+      document.getElementById('status').textContent='English translation ready';
     } else {
+      out.appendChild(frag);
       document.getElementById('status').textContent='Official XSLT render attempt (FR)';
     }
   } catch(e){
