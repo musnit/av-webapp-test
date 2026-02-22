@@ -28,7 +28,7 @@ XML:\n${xml}`;
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: 'gpt-5-nano-2025-08-07',
+      model: 'gpt-5-nano',
       temperature: 0,
       messages: [
         { role: 'system', content: 'You are an XML translator. Return XML only.' },
