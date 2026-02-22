@@ -40,12 +40,14 @@
 
     <div class="tabs">
       <button class="tab active" data-tab="en">English (translated render)</button>
+      <button class="tab" data-tab="improved">Improved layout (EN)</button>
       <button class="tab" data-tab="fr">French (XML/XSLT render)</button>
       <button class="tab" data-tab="pdf">French PDF</button>
       <button class="tab" data-tab="legend">Icon mapping legend</button>
     </div>
 
     <section id="panel-en" class="panel active"><iframe id="frameEn" title="EN render"></iframe></section>
+    <section id="panel-improved" class="panel"><iframe id="frameImproved" title="Improved EN"></iframe></section>
     <section id="panel-fr" class="panel"><iframe id="frameFr" title="FR render"></iframe></section>
     <section id="panel-pdf" class="panel"><iframe id="framePdf" title="FR PDF"></iframe></section>
 
@@ -87,6 +89,7 @@
   <script>
     const validation = document.getElementById('validation');
     const frameEn = document.getElementById('frameEn');
+    const frameImproved = document.getElementById('frameImproved');
     const frameFr = document.getElementById('frameFr');
     const framePdf = document.getElementById('framePdf');
     const debugPanel = document.getElementById('debugPanel');
@@ -120,6 +123,7 @@
 
     function loadFrames(){
       frameEn.src = '/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now();
+      frameImproved.src = '/api/bra-en-improved?massif=3&t=' + Date.now();
       frameFr.src = '/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now();
       framePdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
     }
