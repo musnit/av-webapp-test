@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icon-512.png" />
   <link rel="manifest" href="/manifest.json" />
   <style>
-    body { margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif; background:#0b1324; color:#fff; }
+    body { margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif; background:#0b1324; color:#fff; overflow-x:hidden; }
     .wrap { max-width:980px; margin:0 auto; padding:calc(10px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom)); }
     h1 { font-size:19px; margin:6px 0 10px; }
     .alert { margin-top:8px; padding:10px 12px; border-radius:10px; font-size:13px; display:none; background:#7f1d1d; color:#fee2e2; border:1px solid #ef4444; }
@@ -21,8 +21,8 @@
     .tab.active { background:#2dd4bf; color:#042f2e; border-color:#2dd4bf; font-weight:700; }
     .panel { display:none; }
     .panel.active { display:block; }
-    iframe { width:100%; border:0; border-radius:12px; background:#fff; }
-    #frameEn,#frameFr,#framePdf { height:78vh; }
+    .renderBox { width:100%; min-height:78vh; border:0; border-radius:12px; background:#fff; overflow-x:hidden; }
+    #pdfEmbed { width:100%; height:78vh; border:0; border-radius:12px; background:#fff; }
     .card { margin-top:10px; background:#111827; border:1px solid #334155; border-radius:12px; padding:10px; }
     .legendTable { width:100%; border-collapse:collapse; margin-top:8px; }
     .legendTable th,.legendTable td { border-bottom:1px solid #334155; padding:6px; text-align:left; font-size:12px; vertical-align:middle; }
@@ -46,10 +46,10 @@
       <button class="tab" data-tab="legend">Icon mapping legend</button>
     </div>
 
-    <section id="panel-en" class="panel active"><iframe id="frameEn" title="EN render"></iframe></section>
-    <section id="panel-improved" class="panel"><iframe id="frameImproved" title="Improved EN"></iframe></section>
-    <section id="panel-fr" class="panel"><iframe id="frameFr" title="FR render"></iframe></section>
-    <section id="panel-pdf" class="panel"><iframe id="framePdf" title="FR PDF"></iframe></section>
+    <section id="panel-en" class="panel active"><div id="frameEn" class="renderBox"></div></section>
+    <section id="panel-improved" class="panel"><div id="frameImproved" class="renderBox"></div></section>
+    <section id="panel-fr" class="panel"><div id="frameFr" class="renderBox"></div></section>
+    <section id="panel-pdf" class="panel"><embed id="pdfEmbed" type="application/pdf" /></section>
 
     <section id="panel-legend" class="panel">
       <div class="card">
@@ -91,7 +91,7 @@
     const frameEn = document.getElementById('frameEn');
     const frameImproved = document.getElementById('frameImproved');
     const frameFr = document.getElementById('frameFr');
-    const framePdf = document.getElementById('framePdf');
+    const pdfEmbed = document.getElementById('pdfEmbed');
     const debugPanel = document.getElementById('debugPanel');
 
     function showWarning(msg){ validation.style.display='block'; validation.textContent='⚠️ '+msg; }
@@ -121,11 +121,19 @@
       }
     }
 
-    function loadFrames(){
-      frameEn.src = '/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now();
-      frameImproved.src = '/api/bra-en-improved?massif=3&t=' + Date.now();
-      frameFr.src = '/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now();
-      framePdf.src = '/api/bra-pdf?massif=3&t=' + Date.now();
+    async function loadHtmlInto(url, el){
+      const r = await fetch(url);
+      const txt = await r.text();
+      const doc = new DOMParser().parseFromString(txt, 'text/html');
+      const bodyHtml = doc.body ? doc.body.innerHTML : txt;
+      el.innerHTML = `<div style="overflow-x:hidden">${bodyHtml}</div>`;
+    }
+
+    async function loadFrames(){
+      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=en&t=' + Date.now(), frameEn); } catch(e){ frameEn.textContent='Load failed: '+e.message; }
+      try { await loadHtmlInto('/api/bra-en-improved?massif=3&t=' + Date.now(), frameImproved); } catch(e){ frameImproved.textContent='Load failed: '+e.message; }
+      try { await loadHtmlInto('/api/bra-fr-officialish?massif=3&lang=fr&t=' + Date.now(), frameFr); } catch(e){ frameFr.textContent='Load failed: '+e.message; }
+      pdfEmbed.src = '/api/bra-pdf?massif=3&t=' + Date.now();
     }
 
     document.querySelectorAll('.tab').forEach(btn=>{
