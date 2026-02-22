@@ -27,8 +27,8 @@
     .legendTable th,.legendTable td { border-bottom:1px solid #334155; padding:6px; text-align:left; font-size:12px; vertical-align:middle; }
     .iconCell { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .iconCell img { width:34px; height:34px; object-fit:contain; background:#fff; border-radius:6px; padding:2px; }
-    .iconRowTop { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:8px; }
-    .iconChip { display:flex; align-items:center; gap:6px; background:#0f172a; border:1px solid #334155; border-radius:999px; padding:4px 10px; font-size:12px; }
+    .iconRowTop { display:flex; flex-wrap:nowrap; gap:10px; align-items:center; margin-top:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .iconChip { display:flex; align-items:center; gap:6px; background:#0f172a; border:1px solid #334155; border-radius:999px; padding:4px 10px; font-size:12px; flex:0 0 auto; white-space:nowrap; }
     .iconChip img { width:28px; height:28px; object-fit:contain; background:#fff; border-radius:6px; padding:2px; }
   </style>
 </head>
