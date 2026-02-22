@@ -22,7 +22,6 @@
     .pill { background:#1e293b; color:#93c5fd; border-radius:999px; padding:4px 8px; font-size:12px; }
     .alert { margin-top:10px; padding:10px 12px; border-radius:10px; font-size:13px; display:none; }
     .alert.warn { background:#7f1d1d; color:#fee2e2; border:1px solid #ef4444; }
-    .alert.ok { background:#052e16; color:#dcfce7; border:1px solid #22c55e; }
     .card { margin-top:12px; background:#111827; border:1px solid #334155; border-radius:12px; padding:12px; line-height:1.4; }
     .card h3 { margin:10px 0 6px; font-size:16px; color:#bfdbfe; }
     .small { font-size:13px; color:#cbd5e1; }
@@ -135,22 +134,28 @@
       xmlFr.src = '/api/bra-fr?massif=3&t=' + Date.now();
     }
 
+    function showWarning(msg) {
+      validation.style.display = 'block';
+      validation.className = 'alert warn';
+      validation.textContent = '⚠️ ' + msg;
+    }
+
+    function clearWarning() {
+      validation.style.display = 'none';
+      validation.textContent = '';
+    }
+
     async function validateMapping() {
       try {
         const r = await fetch('/api/bra-validate?massif=3&t=' + Date.now());
         const j = await r.json();
-        validation.style.display = 'block';
         if (!j.ok) {
-          validation.className = 'alert warn';
-          validation.textContent = '⚠️ Mapping warning: ' + (j.warnings || ['Unknown validation issue']).join(' · ');
+          showWarning('Mapping warning: ' + (j.warnings || ['Unknown validation issue']).join(' · '));
         } else {
-          validation.className = 'alert ok';
-          validation.textContent = `✅ Mapping check passed (RISQUEMAXI=${j.risk}, SAT1=${j.sat1 || '-'}, SAT2=${j.sat2 || '-'})`;
+          clearWarning();
         }
       } catch (e) {
-        validation.style.display = 'block';
-        validation.className = 'alert warn';
-        validation.textContent = '⚠️ Mapping validation failed: ' + e.message;
+        showWarning('Mapping validation failed: ' + e.message);
       }
     }
 
@@ -174,7 +179,9 @@
           <div>${j.meteoEn || ''}</div>
         `;
       } catch (e) {
-        en.textContent = 'English summary failed to load: ' + e.message;
+        const msg = 'English translation failed: ' + e.message;
+        en.textContent = msg;
+        showWarning(msg);
       }
     }
 

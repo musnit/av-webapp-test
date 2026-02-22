@@ -76,6 +76,13 @@ async function translateWithLlm(frObj) {
 
 export default async function handler(req, res) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var' });
+    }
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({ error: 'Missing BLOB_READ_WRITE_TOKEN env var' });
+    }
+
     const massif = String(req.query.massif || '3').replace(/[^0-9]/g, '') || '3';
     const xml = await (await getBraBlob(massif, 'xml')).text();
     const fr = structuredFromXml(xml);
